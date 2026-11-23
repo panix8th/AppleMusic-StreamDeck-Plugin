@@ -13,6 +13,8 @@
     <AssemblyName>AppleMusicBridge</AssemblyName>
     <RootNamespace>AppleMusicBridge</RootNamespace>
     <Version>0.1.0</Version>
+    <Product>AppleMusicBridge</Product>
+    <Description>Bridge between the Apple Music app for Windows and the Stream Deck plugin</Description>
     <InvariantGlobalization>true</InvariantGlobalization>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <!-- Allows building/publishing this Windows-only project from Linux or macOS too (CI, cross-compiling). -->

@@ -1,0 +1,56 @@
+# Builds AppleMusicBridge.exe on Windows and publishes it as a GitHub release.
+#
+# Release:  git tag v0.1.0 && git push origin v0.1.0
+# Or run it from the Actions tab ("Run workflow") with a new tag name; the tag is then created on the
+# selected commit.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag to create and release, e.g. v0.1.0"
+        required: true
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: windows-latest
+    env:
+      TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Unit tests
+        run: dotnet test helper/AppleMusicBridge.sln -c Release
+
+      - name: Publish AppleMusicBridge.exe
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          version="${version%%-*}"   # file versions cannot carry a pre-release suffix
+          dotnet publish helper/AppleMusicBridge/AppleMusicBridge.csproj -c Release -o release -p:Version="$version"
+          cd release
+          sha256sum AppleMusicBridge.exe | tee AppleMusicBridge.exe.sha256
+
+      - name: Create the GitHub release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          flags=()
+          # 0.x versions and tags with a suffix (v1.0.0-beta) are marked as pre-releases.
+          if [[ "$TAG" == v0.* || "$TAG" == *-* ]]; then flags+=(--prerelease); fi
+          gh release create "$TAG" release/AppleMusicBridge.exe release/AppleMusicBridge.exe.sha256 \
+            --target "$GITHUB_SHA" \
+            --title "$TAG" \
+            --notes-file .github/release-notes.md \
+            "${flags[@]}"
