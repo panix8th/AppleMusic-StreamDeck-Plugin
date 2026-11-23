@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!--
+    Plugin logo: a Stream Deck key with a music note. Original artwork; deliberately not based on
+    Apple's logo or the Apple Music app icon.
+  -->
+  <defs>
+    <linearGradient id="background" x1="0" y1="0" x2="0" y2="512" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#2B2B34"/>
+      <stop offset="1" stop-color="#0D0D11"/>
+    </linearGradient>
+    <linearGradient id="key" x1="0" y1="92" x2="0" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#25252D"/>
+      <stop offset="1" stop-color="#16161B"/>
+    </linearGradient>
+    <linearGradient id="keyEdge" x1="0" y1="92" x2="0" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#55556A"/>
+      <stop offset="1" stop-color="#26262E"/>
+    </linearGradient>
+    <linearGradient id="note" x1="5" y1="4" x2="19" y2="20" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FF8AA1"/>
+      <stop offset="1" stop-color="#F01F5A"/>
+    </linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <!-- In the note's own 24-unit coordinates (the group is scaled 10x), so 1.6 is a 16 px blur. -->
+      <feGaussianBlur stdDeviation="1.6"/>
+    </filter>
+  </defs>
+
+  <rect width="512" height="512" rx="114" fill="url(#background)"/>
+  <rect x="92" y="92" width="328" height="328" rx="70" fill="url(#key)" stroke="url(#keyEdge)" stroke-width="5"/>
+
+  <!-- Soft glow behind the note. -->
+  <g transform="translate(256 256) scale(10) translate(-12 -12)" fill="#FF2D62" opacity="0.45" filter="url(#glow)">
+    <path d="M8.35 7.3L19.75 5v2.8L8.35 10.1z"/>
+    <rect x="8.35" y="7.3" width="1.8" height="9.1"/>
+    <rect x="17.95" y="5" width="1.8" height="9.4"/>
+    <ellipse cx="7.2" cy="16.6" rx="3" ry="2.35" transform="rotate(-20 7.2 16.6)"/>
+    <ellipse cx="16.8" cy="14.6" rx="3" ry="2.35" transform="rotate(-20 16.8 14.6)"/>
+  </g>
+
+  <!-- The note (same paths as glyphs/note.svg). -->
+  <g transform="translate(256 256) scale(10) translate(-12 -12)" fill="url(#note)">
+    <path d="M8.35 7.3L19.75 5v2.8L8.35 10.1z"/>
+    <rect x="8.35" y="7.3" width="1.8" height="9.1"/>
+    <rect x="17.95" y="5" width="1.8" height="9.4"/>
+    <ellipse cx="7.2" cy="16.6" rx="3" ry="2.35" transform="rotate(-20 7.2 16.6)"/>
+    <ellipse cx="16.8" cy="14.6" rx="3" ry="2.35" transform="rotate(-20 16.8 14.6)"/>
+  </g>
+</svg>

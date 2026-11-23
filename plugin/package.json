@@ -1,0 +1,11 @@
+{
+	"name": "com.panix8th.applemusic",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"icons": "node icons/build-icons.mjs"
+	},
+	"devDependencies": {
+		"@resvg/resvg-js": "^2.6.2"
+	}
+}
