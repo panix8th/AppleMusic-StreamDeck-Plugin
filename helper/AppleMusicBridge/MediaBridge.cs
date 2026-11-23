@@ -119,7 +119,7 @@ internal sealed class MediaBridge : IDisposable
 
                 case Commands.Focus:
                 {
-                    var activation = WindowActivator.BringToFront(_sessionId);
+                    var activation = WindowActivator.BringToFront(_sessionId ?? AppleMusicIdentity.SessionId);
                     if (activation.Ok)
                     {
                         Log.Debug($"Focus: {activation.Detail}");
@@ -257,7 +257,8 @@ internal sealed class MediaBridge : IDisposable
             return ResultMessage.Failure(command, ErrorCodes.NotRunning);
         }
 
-        var result = shuffle ? _controls.ToggleShuffle(_sessionId) : _controls.CycleRepeat(_sessionId);
+        var appId = _sessionId ?? AppleMusicIdentity.SessionId;
+        var result = shuffle ? _controls.ToggleShuffle(appId) : _controls.CycleRepeat(appId);
         if (!result.Ok)
         {
             Log.Info($"Command '{command.Name}' failed: {result.Error}.");
@@ -349,7 +350,7 @@ internal sealed class MediaBridge : IDisposable
             _art = null;
             var appRunning = AppleMusicIdentity.IsAppleMusicProcessRunning();
             // Without a media session the player-bar buttons may still be there (app open, nothing loaded).
-            var buttons = appRunning ? _controls.Read(null) : PlayerControlsState.None;
+            var buttons = appRunning ? _controls.Read(AppleMusicIdentity.SessionId) : PlayerControlsState.None;
             Emit(
                 new StateMessage
                 {
