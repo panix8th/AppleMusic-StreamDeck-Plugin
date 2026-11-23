@@ -16,8 +16,8 @@
 | Part | State |
 | --- | --- |
 | Helper `AppleMusicBridge.exe` | tested on Windows: session found, track, cover, play state and commands work |
-| Stream Deck plugin | tested on a Stream Deck: Now Playing, Play/Pause, Next, Previous |
-| Shuffle / Repeat | new in v1.2, through UI Automation (see below); waiting for a test on Windows |
+| Stream Deck plugin | all six actions tested on a Stream Deck (v1.2) |
+| Shuffle / Repeat | work through UI Automation since v1.2 (see below) |
 
 ## Install
 
