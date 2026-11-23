@@ -67,7 +67,7 @@ The wire format is documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 There is no settings panel: nothing needs configuring. Stream Deck's own title options (font, size, alignment,
 show/hide) still apply.
 
-![All key images and icons](docs/images/icons-preview.png)
+![All key images and icons](docs/images/icon-set.png)
 
 ## Requirements
 
@@ -209,7 +209,7 @@ All images are generated from SVG sources:
 
 Style: dark key background, white glyph, pink accent `#FF4D6D` plus a dot for "on", 28 % opacity for "Apple Music
 is not running", a slash for "not supported". To change an icon, edit the SVG and run `npm run icons` in
-`plugin/`. This also redraws [docs/images/icons-preview.png](docs/images/icons-preview.png).
+`plugin/`. This also redraws [docs/images/icon-set.png](docs/images/icon-set.png).
 
 ## Troubleshooting
 

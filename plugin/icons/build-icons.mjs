@@ -10,7 +10,7 @@
  *   ../com.panix8th.applemusic.sdPlugin/imgs/plugin/category-icon.png     28 / 56    white, transparent
  *   ../com.panix8th.applemusic.sdPlugin/imgs/actions/<action>/icon.png    20 / 40    white, transparent
  *   ../com.panix8th.applemusic.sdPlugin/imgs/actions/<action>/key-*.png   72 / 144   key images
- *   ../../docs/images/icons-preview.png                                             contact sheet
+ *   ../../docs/images/icon-set.png                                             contact sheet
  *
  * Run with `npm run icons` from the plugin folder.
  */
@@ -21,7 +21,7 @@ import { fileURLToPath } from "node:url";
 
 const ICONS_DIR = dirname(fileURLToPath(import.meta.url));
 const IMGS_DIR = resolve(ICONS_DIR, "..", "com.panix8th.applemusic.sdPlugin", "imgs");
-const PREVIEW_FILE = resolve(ICONS_DIR, "..", "..", "docs", "images", "icons-preview.png");
+const PREVIEW_FILE = resolve(ICONS_DIR, "..", "..", "docs", "images", "icon-set.png");
 
 const COLORS = {
 	keyTop: "#26262E",
