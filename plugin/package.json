@@ -1,11 +1,35 @@
 {
 	"name": "com.panix8th.applemusic",
+	"version": "1.1.0",
 	"private": true,
+	"description": "Stream Deck plugin for the Apple Music app for Windows",
 	"type": "module",
 	"scripts": {
-		"icons": "node icons/build-icons.mjs"
+		"build": "npm run build:helper && npm run build:plugin",
+		"build:plugin": "rollup -c",
+		"build:helper": "node scripts/build-helper.mjs",
+		"watch": "rollup -c -w --watch.onEnd=\"streamdeck restart com.panix8th.applemusic\"",
+		"icons": "node icons/build-icons.mjs",
+		"test": "vitest run",
+		"typecheck": "tsc --noEmit",
+		"validate": "streamdeck validate com.panix8th.applemusic.sdPlugin",
+		"pack": "npm run build && streamdeck pack com.panix8th.applemusic.sdPlugin --output ../dist --force"
 	},
 	"devDependencies": {
-		"@resvg/resvg-js": "^2.6.2"
+		"@elgato/cli": "^1.10.5",
+		"@resvg/resvg-js": "^2.6.2",
+		"@rollup/plugin-commonjs": "^29.0.2",
+		"@rollup/plugin-node-resolve": "^15.2.2",
+		"@rollup/plugin-terser": "^1.0.0",
+		"@rollup/plugin-typescript": "^12.1.0",
+		"@tsconfig/node20": "^20.1.2",
+		"@types/node": "~24.1.0",
+		"rollup": "^4.0.2",
+		"tslib": "^2.6.2",
+		"typescript": "^5.2.2",
+		"vitest": "^3.2.4"
+	},
+	"dependencies": {
+		"@elgato/streamdeck": "^3.0.0"
 	}
 }

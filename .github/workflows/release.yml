@@ -1,8 +1,8 @@
-# Builds AppleMusicBridge.exe on Windows and publishes it as a GitHub release.
+# Builds the Stream Deck plugin (with AppleMusicBridge.exe inside) on Windows and publishes a GitHub release
+# with the installable .streamDeckPlugin file and the standalone helper.
 #
-# Release:  git tag v0.1.0 && git push origin v0.1.0
-# Or run it from the Actions tab ("Run workflow") with a new tag name; the tag is then created on the
-# selected commit.
+# Release:  run it from the Actions tab ("Run workflow") with a new tag name, e.g. v1.1.0; the tag is created
+# on the selected commit. Pushing a v* tag works too.
 name: Release
 
 on:
@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Tag to create and release, e.g. v0.1.0"
+        description: "Tag to create and release, e.g. v1.1.0"
         required: true
 
 permissions:
@@ -29,17 +29,48 @@ jobs:
         with:
           dotnet-version: 8.0.x
 
-      - name: Unit tests
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: plugin/package-lock.json
+
+      - name: Versions from the tag
+        shell: bash
+        run: |
+          version="${TAG#v}"
+          version="${version%%-*}"   # file versions cannot carry a pre-release suffix
+          IFS=. read -r major minor patch _ <<< "$version"
+          echo "VERSION=${major:-0}.${minor:-0}.${patch:-0}" >> "$GITHUB_ENV"
+          echo "PLUGIN_VERSION=${major:-0}.${minor:-0}.${patch:-0}.0" >> "$GITHUB_ENV"
+
+      - name: Helper unit tests
         run: dotnet test helper/AppleMusicBridge.sln -c Release
 
       - name: Publish AppleMusicBridge.exe
         shell: bash
         run: |
-          version="${TAG#v}"
-          version="${version%%-*}"   # file versions cannot carry a pre-release suffix
-          dotnet publish helper/AppleMusicBridge/AppleMusicBridge.csproj -c Release -o release -p:Version="$version"
+          dotnet publish helper/AppleMusicBridge/AppleMusicBridge.csproj -c Release -o release -p:Version="$VERSION"
           cd release
           sha256sum AppleMusicBridge.exe | tee AppleMusicBridge.exe.sha256
+
+      - name: Plugin unit tests
+        working-directory: plugin
+        run: |
+          npm ci
+          npm test
+
+      - name: Build and pack the Stream Deck plugin
+        shell: bash
+        working-directory: plugin
+        run: |
+          mkdir -p com.panix8th.applemusic.sdPlugin/bin
+          cp ../release/AppleMusicBridge.exe com.panix8th.applemusic.sdPlugin/bin/
+          npm run build:plugin
+          npx streamdeck validate com.panix8th.applemusic.sdPlugin --no-update-check
+          npx streamdeck pack com.panix8th.applemusic.sdPlugin --output ../release --version "$PLUGIN_VERSION" --force --no-update-check
+          cd ../release
+          sha256sum com.panix8th.applemusic.streamDeckPlugin | tee com.panix8th.applemusic.streamDeckPlugin.sha256
 
       - name: Create the GitHub release
         shell: bash
@@ -49,7 +80,11 @@ jobs:
           flags=()
           # 0.x versions and tags with a suffix (v1.0.0-beta) are marked as pre-releases.
           if [[ "$TAG" == v0.* || "$TAG" == *-* ]]; then flags+=(--prerelease); fi
-          gh release create "$TAG" release/AppleMusicBridge.exe release/AppleMusicBridge.exe.sha256 \
+          gh release create "$TAG" \
+            release/com.panix8th.applemusic.streamDeckPlugin \
+            release/com.panix8th.applemusic.streamDeckPlugin.sha256 \
+            release/AppleMusicBridge.exe \
+            release/AppleMusicBridge.exe.sha256 \
             --target "$GITHUB_SHA" \
             --title "$TAG" \
             --notes-file .github/release-notes.md \

@@ -1,0 +1,138 @@
+{
+	"$schema": "https://schemas.elgato.com/streamdeck/plugins/manifest.json",
+	"UUID": "com.panix8th.applemusic",
+	"Name": "Apple Music",
+	"Version": "1.1.0.0",
+	"Author": "panix8th",
+	"Description": "Control the Apple Music app for Windows: album cover with the song title, play/pause, next, previous, shuffle and repeat.",
+	"Category": "Apple Music",
+	"CategoryIcon": "imgs/plugin/category-icon",
+	"Icon": "imgs/plugin/marketplace",
+	"CodePath": "bin/plugin.js",
+	"SDKVersion": 3,
+	"Software": {
+		"MinimumVersion": "7.1"
+	},
+	"OS": [
+		{
+			"Platform": "windows",
+			"MinimumVersion": "10"
+		}
+	],
+	"Nodejs": {
+		"Version": "24",
+		"Debug": "enabled"
+	},
+	"ApplicationsToMonitor": {
+		"windows": [
+			"AppleMusic.exe"
+		]
+	},
+	"Actions": [
+		{
+			"Name": "Now Playing",
+			"UUID": "com.panix8th.applemusic.now-playing",
+			"Icon": "imgs/actions/now-playing/icon",
+			"Tooltip": "Shows the album cover and the song title. Press to bring Apple Music to the front.",
+			"Controllers": [
+				"Keypad"
+			],
+			"SupportedInMultiActions": false,
+			"States": [
+				{
+					"Image": "imgs/actions/now-playing/key",
+					"TitleAlignment": "bottom"
+				}
+			]
+		},
+		{
+			"Name": "Play/Pause",
+			"UUID": "com.panix8th.applemusic.play-pause",
+			"Icon": "imgs/actions/play-pause/icon",
+			"Tooltip": "Plays or pauses Apple Music. The key always shows the current playback state.",
+			"Controllers": [
+				"Keypad"
+			],
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Name": "Play",
+					"Image": "imgs/actions/play-pause/key-play",
+					"ShowTitle": false
+				},
+				{
+					"Name": "Pause",
+					"Image": "imgs/actions/play-pause/key-pause",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Next Track",
+			"UUID": "com.panix8th.applemusic.next",
+			"Icon": "imgs/actions/next/icon",
+			"Tooltip": "Skips to the next track in Apple Music.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/next/key",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Previous Track",
+			"UUID": "com.panix8th.applemusic.previous",
+			"Icon": "imgs/actions/previous/icon",
+			"Tooltip": "Goes back to the previous track in Apple Music.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/previous/key",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Shuffle",
+			"UUID": "com.panix8th.applemusic.shuffle",
+			"Icon": "imgs/actions/shuffle/icon",
+			"Tooltip": "Turns shuffle on or off. Shown crossed out when Apple Music does not support it.",
+			"Controllers": [
+				"Keypad"
+			],
+			"DisableAutomaticStates": true,
+			"States": [
+				{
+					"Name": "Off",
+					"Image": "imgs/actions/shuffle/key-off",
+					"ShowTitle": false
+				},
+				{
+					"Name": "On",
+					"Image": "imgs/actions/shuffle/key-on",
+					"ShowTitle": false
+				}
+			]
+		},
+		{
+			"Name": "Repeat",
+			"UUID": "com.panix8th.applemusic.repeat",
+			"Icon": "imgs/actions/repeat/icon",
+			"Tooltip": "Cycles repeat: off, all, one. Shown crossed out when Apple Music does not support it.",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/repeat/key-off",
+					"ShowTitle": false
+				}
+			]
+		}
+	]
+}

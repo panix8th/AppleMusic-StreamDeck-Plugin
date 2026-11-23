@@ -13,6 +13,7 @@ plugin/*.sdPlugin/bin/
 plugin/*.sdPlugin/logs/
 plugin/dist/
 *.streamDeckPlugin
+dist/
 
 # OS / editor noise
 Thumbs.db

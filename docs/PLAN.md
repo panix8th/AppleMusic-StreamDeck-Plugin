@@ -42,3 +42,12 @@ docs/                      plan + protocol
 - Apple Music may not expose shuffle/repeat through SMTC; then those keys are shown as disabled.
 - Windows' foreground-lock rules can block "bring to front"; worst case the taskbar button flashes.
 - The self-contained single-file helper is large (~35 MB compressed, untrimmed).
+
+## Findings from testing on Windows
+
+- Apple Music's media session `SourceAppUserModelId` is `AppleInc.AppleMusicWin_nzyj5cx40ttqa!App`; the helper
+  now matches it exactly.
+- Title, artist, album, cover, play state, position and duration are all reported.
+- Apple Music does not enable shuffle or repeat in its media session (`IsShuffleEnabled` / `IsRepeatEnabled`
+  false, `IsShuffleActive` / `AutoRepeatMode` null), so those keys are shown crossed out.
+- Release v1.0 (helper only) was published by the release workflow; from v1.1.0 releases also contain the plugin.
