@@ -18,6 +18,7 @@
     <Compile Include="..\AppleMusicBridge\Protocol.cs" Link="Shared\Protocol.cs" />
     <Compile Include="..\AppleMusicBridge\StateLogic.cs" Link="Shared\StateLogic.cs" />
     <Compile Include="..\AppleMusicBridge\Options.cs" Link="Shared\Options.cs" />
+    <Compile Include="..\AppleMusicBridge\AppleMusicIdentity.cs" Link="Shared\AppleMusicIdentity.cs" />
   </ItemGroup>
 
   <ItemGroup>

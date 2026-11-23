@@ -9,20 +9,21 @@ namespace AppleMusicBridge;
 internal static class AppleMusicIdentity
 {
     /// <summary>
-    /// Matched case-insensitively against each session's SourceAppUserModelId.
-    /// TODO(step 2): replace with an exact match on the ID that --debug reports on the target machine.
+    /// SourceAppUserModelId of the Apple Music media session, as reported by the app on Windows
+    /// (package family name "AppleInc.AppleMusicWin_nzyj5cx40ttqa" + application id "App").
+    /// Confirmed with --debug on a real machine.
     /// </summary>
-    public const string SessionIdFragment = "AppleMusic";
+    public const string SessionId = "AppleInc.AppleMusicWin_nzyj5cx40ttqa!App";
 
     /// <summary>
-    /// Process image names (without ".exe") of the Apple Music app.
-    /// TODO(step 2): confirm with --debug / --list-sessions on the target machine.
+    /// Process image names (without ".exe") of the Apple Music app. Only used as a fallback: when Apple
+    /// Music has no media session yet (running, nothing loaded) and to find its window.
     /// </summary>
     public static readonly IReadOnlyList<string> ProcessNames = ["AppleMusic"];
 
+    /// <summary>Exact, case-insensitive match; every other app's session is ignored.</summary>
     public static bool IsAppleMusicSession(string? sourceAppUserModelId) =>
-        !string.IsNullOrEmpty(sourceAppUserModelId)
-        && sourceAppUserModelId.Contains(SessionIdFragment, StringComparison.OrdinalIgnoreCase);
+        string.Equals(sourceAppUserModelId, SessionId, StringComparison.OrdinalIgnoreCase);
 
     public static bool IsAppleMusicProcessRunning() => GetProcessIds().Count > 0;
 

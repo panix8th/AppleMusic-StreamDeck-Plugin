@@ -12,7 +12,7 @@
     <LangVersion>latest</LangVersion>
     <AssemblyName>AppleMusicBridge</AssemblyName>
     <RootNamespace>AppleMusicBridge</RootNamespace>
-    <Version>0.1.0</Version>
+    <Version>1.1.0</Version>
     <Product>AppleMusicBridge</Product>
     <Description>Bridge between the Apple Music app for Windows and the Stream Deck plugin</Description>
     <InvariantGlobalization>true</InvariantGlobalization>

@@ -193,3 +193,23 @@ public class OptionsTests
         Assert.False(string.IsNullOrEmpty(error));
     }
 }
+
+public class AppleMusicIdentityTests
+{
+    [Theory]
+    [InlineData("AppleInc.AppleMusicWin_nzyj5cx40ttqa!App")]
+    [InlineData("appleinc.applemusicwin_nzyj5cx40ttqa!app")]
+    public void Matches_the_apple_music_session(string id) => Assert.True(AppleMusicIdentity.IsAppleMusicSession(id));
+
+    [Theory]
+    [InlineData("Spotify.exe")]
+    [InlineData("SpotifyAB.SpotifyMusic_zpdnekdrzrea0!Spotify")]
+    [InlineData("Microsoft.ZuneMusic_8wekyb3d8bbwe!Microsoft.ZuneMusic")]
+    [InlineData("AppleInc.AppleTVWin_nzyj5cx40ttqa!App")]
+    [InlineData("iTunes")]
+    [InlineData("AppleMusic")]
+    [InlineData("AppleInc.AppleMusicWin_nzyj5cx40ttqa!App2")]
+    [InlineData("")]
+    [InlineData(null)]
+    public void Ignores_every_other_session(string? id) => Assert.False(AppleMusicIdentity.IsAppleMusicSession(id));
+}
