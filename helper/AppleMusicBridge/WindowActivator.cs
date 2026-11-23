@@ -33,7 +33,24 @@ internal static class WindowActivator
 
     public static ActivationResult BringToFront(string? sessionAppId)
     {
-        var processIds = AppleMusicIdentity.GetProcessIds();
+        var target = FindMainWindow(sessionAppId, out var processIds);
+        if (target is null)
+        {
+            return new ActivationResult(
+                false,
+                ErrorCodes.NoWindow,
+                processIds.Count == 0 ? "Apple Music is not running." : "Apple Music has no visible window.");
+        }
+
+        return Activate(target);
+    }
+
+    /// <summary>Apple Music's main window, or null when it has none (or is not running).</summary>
+    public static WindowInfo? FindMainWindow(string? sessionAppId) => FindMainWindow(sessionAppId, out _);
+
+    private static WindowInfo? FindMainWindow(string? sessionAppId, out HashSet<uint> processIds)
+    {
+        processIds = AppleMusicIdentity.GetProcessIds();
         var windows = FindWindows(processIds, sessionAppId);
 
         if (Log.IsDebugEnabled)
@@ -46,19 +63,9 @@ internal static class WindowActivator
         }
 
         // Prefer a real main window that is not cloaked (cloaked = hidden by DWM, e.g. on another virtual desktop).
-        var target = windows.FirstOrDefault(w => w.IsMainWindowCandidate && (!w.Cloaked || w.Minimized))
+        return windows.FirstOrDefault(w => w.IsMainWindowCandidate && (!w.Cloaked || w.Minimized))
             ?? windows.FirstOrDefault(w => w.IsMainWindowCandidate)
             ?? windows.FirstOrDefault();
-
-        if (target is null)
-        {
-            return new ActivationResult(
-                false,
-                ErrorCodes.NoWindow,
-                processIds.Count == 0 ? "Apple Music is not running." : "Apple Music has no visible window.");
-        }
-
-        return Activate(target);
     }
 
     private static List<WindowInfo> FindWindows(HashSet<uint> processIds, string? sessionAppId)

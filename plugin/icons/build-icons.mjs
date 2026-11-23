@@ -90,15 +90,6 @@ const ACTIONS = {
 			"key-not-running": { glyph: "repeat", opacity: DIMMED },
 		},
 	},
-	// Stream Deck + dial (phase 2).
-	volume: {
-		icon: "volume",
-		keys: {
-			key: { glyph: "volume" },
-			"key-muted": { glyph: "volume-muted", color: COLORS.accent },
-			"key-not-running": { glyph: "volume", opacity: DIMMED },
-		},
-	},
 };
 
 const glyphCache = new Map();

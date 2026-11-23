@@ -1,6 +1,6 @@
 {
 	"name": "com.panix8th.applemusic",
-	"version": "1.1.0",
+	"version": "1.2.0",
 	"private": true,
 	"description": "Stream Deck plugin for the Apple Music app for Windows",
 	"type": "module",

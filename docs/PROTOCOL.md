@@ -59,6 +59,11 @@ Error codes: `not-running`, `no-session`, `unsupported`, `rejected` (Apple Music
 ```json
 {"id":7,"cmd":"next"}
 ```
+Shuffle and repeat go through the media session when it supports them. Apple Music for Windows does not, so the
+helper presses Apple Music's own player-bar buttons through UI Automation instead and reads their state from them
+(`supports.shuffle`/`supports.repeat` are true when the buttons were found; `no-window` / `unsupported` errors when
+not).
+
 `id` is optional and can be any JSON value; it is echoed in the `result`. For manual testing a bare command name
 (`next`) is accepted too.
 
@@ -66,8 +71,8 @@ Error codes: `not-running`, `no-session`, `unsupported`, `rejected` (Apple Music
 | --- | --- |
 | `play`, `pause`, `togglePlayPause` | playback |
 | `next`, `previous` | skip |
-| `toggleShuffle` | flip shuffle (`unsupported` if the session does not support it) |
-| `cycleRepeat` | off → all → one → off (`unsupported` if not supported) |
+| `toggleShuffle` | flip shuffle |
+| `cycleRepeat` | off → all → one → off |
 | `focus` | bring the existing Apple Music window to the front (never launches the app) |
 | `refresh` | re-check everything and send a full `state` including `albumArt` |
 | `ping` | answers `ok` |

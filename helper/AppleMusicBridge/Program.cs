@@ -46,6 +46,11 @@ internal static class Program
             return await Diagnostics.PrintAsync();
         }
 
+        if (options.DumpUi)
+        {
+            return PlayerControls.Dump(Console.Out);
+        }
+
         var output = new ProtocolWriter(Console.OpenStandardOutput(), () => Exit("stdout was closed; exiting.", 0));
         Log.Info($"AppleMusicBridge {Version} started (pid {Environment.ProcessId}{(options.Debug ? ", debug mode" : "")}).");
         output.Send(new HelloMessage(Version, Environment.ProcessId, options.Debug));

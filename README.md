@@ -6,7 +6,7 @@
 
 <p align="center">
   Control the <b>Apple Music app for Windows</b> (the Microsoft Store app, not iTunes) from an Elgato Stream Deck:
-  album cover with the song title on a key, play/pause, next and previous.
+  album cover with the song title on a key, play/pause, next, previous, shuffle and repeat.
 </p>
 
 > Unofficial project, not affiliated with Apple or Elgato. Apple Music is a trademark of Apple Inc.
@@ -16,9 +16,8 @@
 | Part | State |
 | --- | --- |
 | Helper `AppleMusicBridge.exe` | tested on Windows: session found, track, cover, play state and commands work |
-| Stream Deck plugin (6 actions) | built, validated and packaged; tested against a simulated Stream Deck, waiting for a test on a real device |
-| Shuffle / Repeat keys | included, but shown crossed out: Apple Music for Windows does not offer shuffle or repeat to Windows' media controls (`IsShuffleEnabled`/`IsRepeatEnabled` are false) |
-| Stream Deck + dial: Apple Music volume | phase 2 |
+| Stream Deck plugin | tested on a Stream Deck: Now Playing, Play/Pause, Next, Previous |
+| Shuffle / Repeat | new in v1.2, through UI Automation (see below); waiting for a test on Windows |
 
 ## Install
 
@@ -46,6 +45,11 @@ Stream Deck app ──WebSocket (Elgato SDK)── plugin (Node.js, bin/plugin.j
 - The plugin starts the helper once, restarts it with a growing delay (1 s up to 30 s) if it crashes, and stops it
   with the plugin. The helper also exits by itself when the plugin goes away (stdin closed, `--parent-pid` gone).
 - Apple Music is **never launched** by the plugin. While it isn't running, the keys are dimmed.
+- **Shuffle and repeat** are not offered by Apple Music to Windows' media controls (`IsShuffleEnabled` and
+  `IsRepeatEnabled` are false). The helper therefore uses **UI Automation**, the accessibility API screen readers
+  use: it finds the Shuffle and Repeat buttons in Apple Music's player bar, presses them, reads their state and
+  gets notified when they change. No mouse clicks, and the window is not brought to the front. If Apple Music
+  has no window open, these two keys show as crossed out.
 
 The wire format is documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
@@ -57,9 +61,8 @@ The wire format is documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 | **Play/Pause** | ▶ or ❚❚, always following the real playback state (app, media keys, ...) | play / pause; in a multi-action choose "Play" or "Pause" |
 | **Next Track** | ▶❙ | next track |
 | **Previous Track** | ❙◀ | previous track |
-| **Shuffle** | off / on, crossed out when not supported | toggle |
-| **Repeat** | off / all / one, crossed out when not supported | off → all → one → off |
-| **Volume** (Stream Deck +, phase 2) | cover, title and volume on the touch strip | rotate = volume, press = mute |
+| **Shuffle** | off / on; crossed out when Apple Music's button can't be reached | toggle |
+| **Repeat** | off / all / one; crossed out when Apple Music's button can't be reached | off → all → one → off |
 
 There is no settings panel: nothing needs configuring. Stream Deck's own title options (font, size, alignment,
 show/hide) still apply.
@@ -172,6 +175,13 @@ Prints every media session (the Apple Music one is marked `<== matched as Apple 
 "apple" or "music" in its name, then exits.
 
 ```powershell
+.\AppleMusicBridge.exe --dump-ui
+```
+
+Shows which of Apple Music's player-bar controls UI Automation sees (name, id, toggle state, position), which
+ones were picked as Shuffle and Repeat, and the state read from them. Send this output if those keys don't work.
+
+```powershell
 .\AppleMusicBridge.exe --debug
 ```
 
@@ -207,7 +217,7 @@ is not running", a slash for "not supported". To change an icon, edit the SVG an
 | --- | --- |
 | Keys stay dimmed although Apple Music is open | Play a song once: Apple Music registers its media session when it has something loaded. Run `AppleMusicBridge.exe --list-sessions` to see what Windows reports. |
 | All keys dimmed and Now Playing has no text | The helper isn't running. The plugin log says why (for example `AppleMusicBridge.exe not found`). |
-| Shuffle/Repeat crossed out | Expected: Apple Music for Windows does not support them through Windows' media controls. |
+| Shuffle/Repeat crossed out or not reacting | Apple Music's window must be open (minimized is fine). Otherwise run `AppleMusicBridge.exe --dump-ui` while Apple Music is open and share the output: it shows what Apple Music's player bar offers. |
 | Now Playing press only flashes the taskbar button | Windows blocked the focus change (focus-stealing protection). Click the taskbar button. |
 | No cover on the key | Some tracks have no artwork. With `--debug` the helper saves the cover it got to `%TEMP%\AppleMusicBridge\cover.png`. |
 | Windows SmartScreen or antivirus warns about the exe | The files are unsigned. |

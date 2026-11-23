@@ -213,3 +213,14 @@ public class AppleMusicIdentityTests
     [InlineData(null)]
     public void Ignores_every_other_session(string? id) => Assert.False(AppleMusicIdentity.IsAppleMusicSession(id));
 }
+
+public class DumpUiOptionTests
+{
+    [Fact]
+    public void Dump_ui_flag()
+    {
+        Assert.True(Options.TryParse(["--dump-ui"], out var options, out _));
+        Assert.True(options.DumpUi);
+        Assert.False(options.ListSessions);
+    }
+}

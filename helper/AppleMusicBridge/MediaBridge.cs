@@ -72,6 +72,9 @@ internal sealed class MediaBridge : IDisposable
     private string? _lastSentArtId;
     private int _consecutiveFailures;
 
+    // Shuffle and repeat through Apple Music's own buttons (its media session does not offer them).
+    private readonly PlayerControls _controls;
+
     /// <param name="abbreviateArt">Shorten albumArt in the output (stdout is a terminal, not the plugin).</param>
     public MediaBridge(ProtocolWriter output, bool debug, bool abbreviateArt)
     {
@@ -82,6 +85,7 @@ internal sealed class MediaBridge : IDisposable
         _onMediaPropertiesChanged = (_, _) => OnEvent(RefreshReason.Media, "MediaPropertiesChanged");
         _onPlaybackInfoChanged = (_, _) => OnEvent(RefreshReason.Playback, "PlaybackInfoChanged");
         _onTimelinePropertiesChanged = (_, _) => OnEvent(RefreshReason.Timeline, "TimelinePropertiesChanged");
+        _controls = new PlayerControls(() => OnEvent(RefreshReason.Playback, "Shuffle/repeat button changed"));
     }
 
     public async Task StartAsync()
@@ -125,6 +129,10 @@ internal sealed class MediaBridge : IDisposable
                     Log.Info($"Focus failed ({activation.Error}): {activation.Detail}");
                     return ResultMessage.Failure(command, activation.Error ?? ErrorCodes.Failed);
                 }
+
+                case Commands.ToggleShuffle:
+                case Commands.CycleRepeat:
+                    return await ShuffleOrRepeatAsync(command);
             }
 
             var session = _session;
@@ -176,31 +184,6 @@ internal sealed class MediaBridge : IDisposable
                     refresh |= RefreshReason.Media;
                     break;
 
-                case Commands.ToggleShuffle:
-                {
-                    var info = session.GetPlaybackInfo();
-                    if (!info.Controls.IsShuffleEnabled)
-                    {
-                        return ResultMessage.Failure(command, ErrorCodes.Unsupported);
-                    }
-
-                    accepted = await Call(session.TryChangeShuffleActiveAsync(!(info.IsShuffleActive ?? false)));
-                    break;
-                }
-
-                case Commands.CycleRepeat:
-                {
-                    var info = session.GetPlaybackInfo();
-                    if (!info.Controls.IsRepeatEnabled)
-                    {
-                        return ResultMessage.Failure(command, ErrorCodes.Unsupported);
-                    }
-
-                    var current = info.AutoRepeatMode is { } mode ? FromWinRt(mode) : RepeatMode.Off;
-                    accepted = await Call(session.TryChangeAutoRepeatModeAsync(ToWinRt(RepeatModes.Next(current))));
-                    break;
-                }
-
                 default:
                     return ResultMessage.Failure(command, ErrorCodes.UnknownCommand);
             }
@@ -233,6 +216,7 @@ internal sealed class MediaBridge : IDisposable
     {
         _cts.Cancel();
         DetachSession();
+        _controls.Dispose();
         if (_manager is not null)
         {
             try
@@ -244,6 +228,65 @@ internal sealed class MediaBridge : IDisposable
                 // Shutting down anyway.
             }
         }
+    }
+
+    /// <summary>
+    /// Shuffle/repeat: through the media session when it supports them, otherwise by pressing Apple Music's own
+    /// player-bar button through UI Automation (Apple Music for Windows does not offer them to the media session).
+    /// </summary>
+    private async Task<ResultMessage> ShuffleOrRepeatAsync(Command command)
+    {
+        var shuffle = command.Name == Commands.ToggleShuffle;
+        var session = _session;
+        if (session is not null)
+        {
+            var info = session.GetPlaybackInfo();
+            if (shuffle && info.Controls.IsShuffleEnabled)
+            {
+                return Finish(command, await Call(session.TryChangeShuffleActiveAsync(!(info.IsShuffleActive ?? false))));
+            }
+
+            if (!shuffle && info.Controls.IsRepeatEnabled)
+            {
+                var current = info.AutoRepeatMode is { } mode ? FromWinRt(mode) : RepeatMode.Off;
+                return Finish(command, await Call(session.TryChangeAutoRepeatModeAsync(ToWinRt(RepeatModes.Next(current)))));
+            }
+        }
+        else if (!AppleMusicIdentity.IsAppleMusicProcessRunning())
+        {
+            return ResultMessage.Failure(command, ErrorCodes.NotRunning);
+        }
+
+        var result = shuffle ? _controls.ToggleShuffle(_sessionId) : _controls.CycleRepeat(_sessionId);
+        if (!result.Ok)
+        {
+            Log.Info($"Command '{command.Name}' failed: {result.Error}.");
+            return ResultMessage.Failure(command, result.Error ?? ErrorCodes.Failed);
+        }
+
+        // The button updates asynchronously; its change event normally triggers the update, this is a fallback.
+        _ = Task.Delay(TimeSpan.FromMilliseconds(300), _cts.Token).ContinueWith(
+            delay =>
+            {
+                if (!delay.IsCanceled)
+                {
+                    Request(RefreshReason.Playback);
+                }
+            },
+            TaskScheduler.Default);
+        return ResultMessage.Success(command);
+    }
+
+    private ResultMessage Finish(Command command, bool accepted)
+    {
+        Request(RefreshReason.Playback);
+        if (accepted)
+        {
+            return ResultMessage.Success(command);
+        }
+
+        Log.Info($"Apple Music rejected '{command.Name}'.");
+        return ResultMessage.Failure(command, ErrorCodes.Rejected);
     }
 
     private static Task<bool> Call(IAsyncOperation<bool> operation) => operation.AsTask().WaitAsync(CallTimeout);
@@ -304,13 +347,19 @@ internal sealed class MediaBridge : IDisposable
         {
             _media = MediaText.Empty;
             _art = null;
+            var appRunning = AppleMusicIdentity.IsAppleMusicProcessRunning();
+            // Without a media session the player-bar buttons may still be there (app open, nothing loaded).
+            var buttons = appRunning ? _controls.Read(null) : PlayerControlsState.None;
             Emit(
                 new StateMessage
                 {
-                    AppRunning = AppleMusicIdentity.IsAppleMusicProcessRunning(),
+                    AppRunning = appRunning,
                     HasSession = false,
                     Status = PlaybackStatusText.None,
+                    Shuffle = buttons.Shuffle,
+                    Repeat = buttons.Repeat is { } repeat ? RepeatModes.ToWire(repeat) : null,
                     Timestamp = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
+                    Supports = Capabilities.None with { Shuffle = buttons.HasShuffle, Repeat = buttons.HasRepeat },
                 },
                 force);
             return;
@@ -513,6 +562,16 @@ internal sealed class MediaBridge : IDisposable
         var controls = info.Controls;
         var status = info.PlaybackStatus;
 
+        // Apple Music for Windows does not offer shuffle/repeat through its media session; read them from its
+        // player-bar buttons instead (only when the session does not report them itself).
+        var buttons = controls.IsShuffleEnabled && controls.IsRepeatEnabled
+            ? PlayerControlsState.None
+            : _controls.Read(_sessionId);
+        var shuffle = controls.IsShuffleEnabled ? info.IsShuffleActive : buttons.Shuffle;
+        RepeatMode? repeat = controls.IsRepeatEnabled
+            ? info.AutoRepeatMode is { } autoRepeat ? FromWinRt(autoRepeat) : null
+            : buttons.Repeat;
+
         var isPlaying = status switch
         {
             PlaybackStatus.Playing => true,
@@ -554,8 +613,8 @@ internal sealed class MediaBridge : IDisposable
             Album = _media.Album,
             IsPlaying = isPlaying,
             Status = PlaybackStatusText.FromName(status.ToString()),
-            Shuffle = info.IsShuffleActive,
-            Repeat = info.AutoRepeatMode is { } mode ? RepeatModes.ToWire(FromWinRt(mode)) : null,
+            Shuffle = shuffle,
+            Repeat = repeat is { } mode ? RepeatModes.ToWire(mode) : null,
             Position = position,
             Duration = duration,
             Timestamp = now.ToUnixTimeMilliseconds(),
@@ -566,8 +625,8 @@ internal sealed class MediaBridge : IDisposable
                 PlayPause: controls.IsPlayPauseToggleEnabled || controls.IsPlayEnabled || controls.IsPauseEnabled,
                 Next: controls.IsNextEnabled,
                 Previous: controls.IsPreviousEnabled,
-                Shuffle: controls.IsShuffleEnabled,
-                Repeat: controls.IsRepeatEnabled),
+                Shuffle: controls.IsShuffleEnabled || buttons.HasShuffle,
+                Repeat: controls.IsRepeatEnabled || buttons.HasRepeat),
             SourceAppId = _sessionId,
         };
     }

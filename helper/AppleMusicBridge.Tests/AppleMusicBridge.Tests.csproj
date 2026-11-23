@@ -19,6 +19,7 @@
     <Compile Include="..\AppleMusicBridge\StateLogic.cs" Link="Shared\StateLogic.cs" />
     <Compile Include="..\AppleMusicBridge\Options.cs" Link="Shared\Options.cs" />
     <Compile Include="..\AppleMusicBridge\AppleMusicIdentity.cs" Link="Shared\AppleMusicIdentity.cs" />
+    <Compile Include="..\AppleMusicBridge\PlayerControlMatching.cs" Link="Shared\PlayerControlMatching.cs" />
   </ItemGroup>
 
   <ItemGroup>

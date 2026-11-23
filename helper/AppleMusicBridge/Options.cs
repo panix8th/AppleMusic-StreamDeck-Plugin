@@ -3,7 +3,7 @@ using System.Globalization;
 namespace AppleMusicBridge;
 
 /// <summary>Command-line options. Platform-neutral: also compiled into the unit tests.</summary>
-internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? ParentPid)
+internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? ParentPid, bool DumpUi = false)
 {
     public const string Usage = """
         Usage: AppleMusicBridge.exe [options]
@@ -12,6 +12,8 @@ internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? Pa
                              Apple/Music processes, raw media and playback fields, window search.
                              Also saves the current cover to %TEMP%\AppleMusicBridge\cover.png.
           --list-sessions    Print all media sessions and Apple/Music processes, then exit.
+          --dump-ui          Print the controls UI Automation sees in Apple Music's player bar (used for
+                             shuffle/repeat) and the state read from them, then exit.
           --parent-pid <id>  Exit as soon as that process exits (used by the Stream Deck plugin).
           --help             Show this help.
 
@@ -26,6 +28,7 @@ internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? Pa
     {
         var debug = false;
         var listSessions = false;
+        var dumpUi = false;
         var help = false;
         int? parentPid = null;
         error = null;
@@ -39,6 +42,9 @@ internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? Pa
                     break;
                 case "--list-sessions":
                     listSessions = true;
+                    break;
+                case "--dump-ui":
+                    dumpUi = true;
                     break;
                 case "--help" or "-h" or "/?":
                     help = true;
@@ -63,7 +69,7 @@ internal sealed record Options(bool Debug, bool ListSessions, bool Help, int? Pa
             }
         }
 
-        options = new Options(debug, listSessions, help, parentPid);
+        options = new Options(debug, listSessions, help, parentPid, dumpUi);
         return true;
     }
 }

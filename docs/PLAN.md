@@ -50,4 +50,6 @@ docs/                      plan + protocol
 - Title, artist, album, cover, play state, position and duration are all reported.
 - Apple Music does not enable shuffle or repeat in its media session (`IsShuffleEnabled` / `IsRepeatEnabled`
   false, `IsShuffleActive` / `AutoRepeatMode` null), so those keys are shown crossed out.
-- Release v1.0 (helper only) was published by the release workflow; from v1.1.0 releases also contain the plugin.
+- Release v1.0 (helper only) was published by the release workflow; later releases also contain the plugin.
+- v1.2: shuffle and repeat go through Apple Music's own player-bar buttons via UI Automation instead.
+- Phase 2 (volume dial) is not built; it was dropped from the README until someone needs it.
