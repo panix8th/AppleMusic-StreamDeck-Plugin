@@ -1,0 +1,19 @@
+# .NET helper
+helper/**/bin/
+helper/**/obj/
+helper/publish/
+*.user
+.vs/
+
+# Node.js
+node_modules/
+
+# Stream Deck plugin build output
+plugin/*.sdPlugin/bin/
+plugin/*.sdPlugin/logs/
+plugin/dist/
+*.streamDeckPlugin
+
+# OS / editor noise
+Thumbs.db
+.DS_Store
