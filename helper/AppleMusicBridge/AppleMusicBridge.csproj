@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <!-- The 10.0.19041.0 suffix pulls in the Windows SDK projection (Windows.Media.Control, Windows.Graphics.Imaging). -->
+    <TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+    <!-- GlobalSystemMediaTransportControlsSessionManager exists since Windows 10 1809 (build 17763). -->
+    <SupportedOSPlatformVersion>10.0.17763.0</SupportedOSPlatformVersion>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <AssemblyName>AppleMusicBridge</AssemblyName>
+    <RootNamespace>AppleMusicBridge</RootNamespace>
+    <Version>0.1.0</Version>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+    <!-- Allows building/publishing this Windows-only project from Linux or macOS too (CI, cross-compiling). -->
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+  </PropertyGroup>
+
+  <!-- dotnet publish: one self-contained exe, no .NET installation needed on the machine running Stream Deck. -->
+  <PropertyGroup>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+  </PropertyGroup>
+
+</Project>

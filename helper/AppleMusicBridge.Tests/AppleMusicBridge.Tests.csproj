@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <LangVersion>latest</LangVersion>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+
+  <!--
+    The platform-neutral parts of the helper are compiled straight into the tests, so the tests run on
+    any OS without Windows APIs (the helper itself targets net8.0-windows).
+  -->
+  <ItemGroup>
+    <Compile Include="..\AppleMusicBridge\Protocol.cs" Link="Shared\Protocol.cs" />
+    <Compile Include="..\AppleMusicBridge\StateLogic.cs" Link="Shared\StateLogic.cs" />
+    <Compile Include="..\AppleMusicBridge\Options.cs" Link="Shared\Options.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2" />
+  </ItemGroup>
+
+</Project>
